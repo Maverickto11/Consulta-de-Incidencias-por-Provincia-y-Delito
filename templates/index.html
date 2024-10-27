@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Consulta de Incidencias</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            margin-top: 15%;
+        }
+
+        #main-container {
+            width: 80%;
+            max-width: 1000px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        /* Estilo de etiquetas y selectores */
+        label {
+            font-weight: bold;
+            color: #555;
+            margin-right: 10px;
+        }
+
+        select {
+            padding: 8px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            width: calc(100% - 20px);
+        }
+
+        /* Botón de consulta */
+        button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Contenedor del gráfico */
+        #chart-container {
+            width: 90%;
+            height: 500px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 10px;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Canvas para el gráfico */
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="main-container">
+        <h1>Consulta de Incidencias por Provincia y Delito</h1>
+        
+        <label for="provincia">Provincia:</label>
+        <select id="provincia">
+            <option value="">Seleccione una provincia</option>
+            {% for provincia in provincias %}
+                <option value="{{ provincia }}">{{ provincia }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="delito">Delito:</label>
+        <select id="delito">
+            <option value="">Seleccione un delito</option>
+            {% for delito in delitos %}
+                <option value="{{ delito }}">{{ delito }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="tipo">Ver por:</label>
+        <select id="tipo">
+            <option value="mes">Mes</option>
+            <option value="año">Año</option>
+        </select>
+        
+        <button onclick="getData()">Consultar</button>
+
+        <div id="chart-container">
+            <canvas id="chart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        async function getData() {
+            const provincia = document.getElementById('provincia').value;
+            const delito = document.getElementById('delito').value;
+            const tipo = document.getElementById('tipo').value;
+
+            if (!provincia || !delito) {
+                alert("Seleccione una provincia y un delito.");
+                return;
+            }
+
+            const response = await fetch('/get_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ provincia, delito, tipo })
+            });
+            
+            const data = await response.json();
+
+            const labels = data.map(item => item.Fecha);
+            const incidents = data.map(item => item.Incidentes);
+
+            // Renderizar gráfico
+            renderChart(labels, incidents);
+        }
+
+        function renderChart(labels, data) {
+            const ctx = document.getElementById('chart').getContext('2d');
+            if (window.chartInstance) {
+                window.chartInstance.destroy();
+            }
+            window.chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Número de Incidentes',
+                        data: data,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: tipo === 'mes' ? 'Fecha' : 'Año' } },
+                        y: { title: { display: true, text: 'Incidentes' } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
