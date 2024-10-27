@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 
@@ -42,4 +43,5 @@ def get_data():
     return jsonify(datos_json)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host='0.0.0.0', port=port)
