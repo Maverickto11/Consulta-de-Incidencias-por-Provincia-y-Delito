@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 import os
-=======
->>>>>>> e0837399f0e720292cae0cf9bc7afd11e6fd45b2
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 
@@ -46,9 +43,5 @@ def get_data():
     return jsonify(datos_json)
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     port = int(os.environ.get("PORT", 8000))
     app.run(host='0.0.0.0', port=port)
-=======
-    app.run(debug=True)
->>>>>>> e0837399f0e720292cae0cf9bc7afd11e6fd45b2
