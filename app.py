@@ -44,5 +44,5 @@ def home():
     return "La API está funcionando. Accede a las rutas /api/provincias o /api/delitos."
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
-    app.run(host='0.0.0.0', port=port)
+    port = int(os.environ.get("PORT", 5000))  # Render asigna el puerto
+    app.run(host="0.0.0.0", port=port)
